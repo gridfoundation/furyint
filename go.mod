@@ -7,7 +7,7 @@ require (
 	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/celestiaorg/go-cnc v0.2.0
 	github.com/dgraph-io/badger/v3 v3.2103.3
-	github.com/gridfoundation/cosmosclient v0.3.0-beta
+	github.com/gridfoundation/cosmosclient v0.3.1-grid-rc0
 	github.com/go-kit/kit v0.12.0
 	github.com/gofrs/uuid v4.2.0+incompatible
 	github.com/gogo/protobuf v1.3.3
@@ -78,7 +78,7 @@ require (
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/dustin/go-humanize v1.0.1-0.20200219035652-afde56e7acac // indirect
 	github.com/dvsekhvalnov/jose2go v1.5.0 // indirect
-	github.com/gridfoundation/gridiron v0.1.0-alpha.0.20230110174626-23b70dccd1e5
+	github.com/gridfoundation/gridiron 
 	github.com/elastic/gosigar v0.14.2 // indirect
 	github.com/flynn/noise v1.0.0 // indirect
 	github.com/francoispqt/gojay v1.2.13 // indirect
@@ -246,9 +246,9 @@ require (
 )
 
 replace (
-	github.com/cosmos/ibc-go/v3 => github.com/gridfoundation/ibc-go/v3 v3.0.0-rc2.0.20230105134315-1870174ab6da
+	github.com/cosmos/ibc-go/v3 => github.com/gridfoundation/ibc-go/v3 v3.0.1-grid-rc0
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.2-alpha.regen.4
-	github.com/gorilla/rpc => github.com/gridfoundation/rpc v1.3.1
+	github.com/gorilla/rpc => github.com/gridfoundation/rpc v1.3.2
 	google.golang.org/grpc => google.golang.org/grpc v1.33.2
 
 )
