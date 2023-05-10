@@ -1,0 +1,82 @@
+package mockserv
+
+import (
+	"context"
+	"os"
+
+	tmlog "github.com/tendermint/tendermint/libs/log"
+	"google.golang.org/grpc"
+
+	grpcda "github.com/gridfoundation/furyint/da/grpc"
+	"github.com/gridfoundation/furyint/da/mock"
+	"github.com/gridfoundation/furyint/store"
+	"github.com/gridfoundation/furyint/types"
+	"github.com/gridfoundation/furyint/types/pb/dalc"
+	"github.com/gridfoundation/furyint/types/pb/furyint"
+)
+
+// GetServer creates and returns gRPC server instance.
+func GetServer(kv store.KVStore, conf grpcda.Config, mockConfig []byte) *grpc.Server {
+	logger := tmlog.NewTMLogger(os.Stdout)
+
+	srv := grpc.NewServer()
+	mockImpl := &mockImpl{}
+	err := mockImpl.mock.Init(mockConfig, kv, logger)
+	if err != nil {
+		logger.Error("failed to initialize mock DALC", "error", err)
+		panic(err)
+	}
+	err = mockImpl.mock.Start()
+	if err != nil {
+		logger.Error("failed to start mock DALC", "error", err)
+		panic(err)
+	}
+	dalc.RegisterDALCServiceServer(srv, mockImpl)
+	return srv
+}
+
+type mockImpl struct {
+	mock mock.DataAvailabilityLayerClient
+}
+
+func (m *mockImpl) SubmitBatch(_ context.Context, request *dalc.SubmitBatchRequest) (*dalc.SubmitBatchResponse, error) {
+	var b types.Batch
+	err := b.FromProto(request.Batch)
+	if err != nil {
+		return nil, err
+	}
+	resp := m.mock.SubmitBatch(&b)
+	return &dalc.SubmitBatchResponse{
+		Result: &dalc.DAResponse{
+			Code:            dalc.StatusCode(resp.Code),
+			Message:         resp.Message,
+			DataLayerHeight: resp.DAHeight,
+		},
+	}, nil
+}
+
+func (m *mockImpl) CheckBatchAvailability(_ context.Context, request *dalc.CheckBatchAvailabilityRequest) (*dalc.CheckBatchAvailabilityResponse, error) {
+	resp := m.mock.CheckBatchAvailability(request.DataLayerHeight)
+	return &dalc.CheckBatchAvailabilityResponse{
+		Result: &dalc.DAResponse{
+			Code:    dalc.StatusCode(resp.Code),
+			Message: resp.Message,
+		},
+		DataAvailable: resp.DataAvailable,
+	}, nil
+}
+
+func (m *mockImpl) RetrieveBatches(context context.Context, request *dalc.RetrieveBatchesRequest) (*dalc.RetrieveBatchesResponse, error) {
+	resp := m.mock.RetrieveBatches(request.DataLayerHeight)
+	batches := make([]*furyint.Batch, len(resp.Batches))
+	for i := range resp.Batches {
+		batches[i] = resp.Batches[i].ToProto()
+	}
+	return &dalc.RetrieveBatchesResponse{
+		Result: &dalc.DAResponse{
+			Code:    dalc.StatusCode(resp.Code),
+			Message: resp.Message,
+		},
+		Batches: batches,
+	}, nil
+}

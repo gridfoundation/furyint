@@ -1,0 +1,11 @@
+syntax = "proto3";
+package p2p.events;
+
+option go_package = "github.com/gridfoundation/furyint/p2p/pb";
+
+import "types/furyint/furyint.proto";
+
+message GossipedBlock {
+	furyint.Block block = 1;
+	furyint.Commit commit = 2;
+}
